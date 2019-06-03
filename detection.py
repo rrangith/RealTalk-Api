@@ -32,12 +32,17 @@ emotion_labels = get_labels('fer2013')
 face_detection = load_detection_model(detection_model_path)
 emotion_classifier = load_model(emotion_model_path, compile=False)
 
+emotion_offsets = (20, 40)
+
+ # getting input model shapes for inference
+emotion_target_size = emotion_classifier.input_shape[1:3]
+
 im_width, im_height = (400, 350)
 
 num_hands_detect = 2 # max number of hands we want to detect/track, can scale this up
 min_threshold = 0.2
 
-def detect(image):
+def detectImage(image):
     img_data = base64.b64decode(str(image))
     image_np = np.asarray(Image.open(io.BytesIO(img_data)))
     image_np = cv2.flip(image_np, 1)
@@ -50,4 +55,27 @@ def detect(image):
     # Hint: If len(boxes) > 1 , you may assume you have found atleast one hand (within your score threshold)
     boxes, scores = detector_utils.detect_objects(image_np, detection_graph, sess)
 
-    coords = detector_utils.get_coords(num_hands_detect, min_threshold, scores, boxes, im_width, im_height, image_np) #0.2 is the min threshold
+    hand_coords = detector_utils.get_coords(num_hands_detect, min_threshold, scores, boxes, im_width, im_height, image_np) #0.2 is the min threshold
+
+    face_details = []
+
+    for face_coords in faces:
+        x1, x2, y1, y2 = apply_offsets(face_coords, emotion_offsets)
+        gray_face = gray_image[y1:y2, x1:x2]
+        gray_face = cv2.resize(gray_face, (emotion_target_size))
+        gray_face = preprocess_input(gray_face, True)
+        gray_face = np.expand_dims(gray_face, 0)
+        gray_face = np.expand_dims(gray_face, -1)
+        emotion_prediction = emotion_classifier.predict(gray_face)
+        emotion_probability = np.max(emotion_prediction)
+        emotion_label_arg = np.argmax(emotion_prediction)
+        face_details.append((emotion_labels[emotion_label_arg], face_coords))
+
+    image_details = {
+                        "hands": hand_coords,
+                        "faces": face_details
+                    }
+    
+    return image_details
+
+    

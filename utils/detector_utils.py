@@ -51,7 +51,9 @@ def get_coords(num_hands_detect, score_thresh, scores, boxes, im_width, im_heigh
         if (scores[i] > score_thresh):
             (left, right, top, bottom) = (boxes[i][1] * im_width, boxes[i][3] * im_width,
                                           boxes[i][0] * im_height, boxes[i][2] * im_height)
-            coords.push((int(left), int(top), int(right), int(bottom)))
+            coords.append((int(left), int(top), int(right), int(bottom)))
+        else:
+            coords.append(None)
 
     return coords
 

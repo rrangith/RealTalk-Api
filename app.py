@@ -1,7 +1,7 @@
 from flask import Flask, render_template, jsonify, request, abort
 from flask_cors import CORS
-from video import Video
 import json
+from detection import detectImage
 
 app = Flask(__name__)
 CORS(app)
@@ -13,7 +13,8 @@ def index():
 
 @app.route('/detect', methods=['GET'])
 def detect():
-    request.data.decode("utf-8").split(';base64,')[1][:-1]
+    image = request.data.decode("utf-8").split(';base64,')[1][:-1]
+    detectImage(image)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
