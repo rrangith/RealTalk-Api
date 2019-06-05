@@ -27,16 +27,14 @@ emotion_labels = get_labels('fer2013')
 num_hands_detect = 2 # max number of hands we want to detect/track, can scale this up
 min_threshold = 0.2
 
-def loadEmotionClassifier():
-    global emotion_classifier
-    emotion_classifier = load_model(emotion_model_path, compile=False)
-     # getting input model shapes for inference
-    global graph
-    graph = tf.get_default_graph()
+global emotion_classifier
+emotion_classifier = load_model(emotion_model_path, compile=False)
+    # getting input model shapes for inference
+global graph
+graph = tf.get_default_graph()
 
 
 def detectImage(image):
-    loadEmotionClassifier()
     emotion_target_size = emotion_classifier.input_shape[1:3]
 
     # loading models
