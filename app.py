@@ -29,8 +29,8 @@ def detectBinary():
 @app.route('/detectFile', methods=['POST'])
 def detectFile():
     image = Image.open(request.files['file'])
-    detectImage(image)
-    return 'hi'
+    response = detectImage(image)
+    return jsonify(response)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
