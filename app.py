@@ -28,16 +28,22 @@ def index():
 
 @app.route('/detectFile', methods=['POST'])
 def detectFile():
-    image = Image.open(request.files['file'])
-    response = detectImage(image)
-    return jsonify(response)
+    try:
+        image = Image.open(request.files['file'])
+        response = detectImage(image)
+        return jsonify(response)
+    except:
+        abort(400)
 
 @app.route('/detectLink', methods=['POST'])
 def detectLink():
-    response = requests.get(request.get_json()['url'])
-    image = Image.open(BytesIO(response.content))
-    response = detectImage(image)
-    return jsonify(response)
+    try:
+        image_data = requests.get(request.get_json()['url'])
+        image = Image.open(BytesIO(image_data.content))
+        response = detectImage(image)
+        return jsonify(response)
+    except:
+        abort(400)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
