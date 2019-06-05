@@ -56,7 +56,22 @@ def detectImage(image):
 
     faces = detect_faces(face_detection, gray_image)
 
-    draw_bounding_box(faces[0], image_np)
+    if len(faces) > 0:
+        draw_bounding_box(faces[0], image_np)
+        x1, x2, y1, y2 = apply_offsets(faces[0], emotion_offsets)
+        gray_face = gray_image[y1:y2, x1:x2]
+        gray_face = cv2.resize(gray_face, (emotion_target_size))
+        gray_face = preprocess_input(gray_face, True)
+        gray_face = np.expand_dims(gray_face, 0)
+        gray_face = np.expand_dims(gray_face, -1)
+        with graph.as_default():
+            emotion_prediction = emotion_classifier.predict(gray_face)
+        emotion_probability = np.max(emotion_prediction)
+        emotion_label_arg = np.argmax(emotion_prediction)
+    
+        face_details = [emotion_labels[emotion_label_arg], [int(faces[0][0]), int(faces[0][1]), int(faces[0][2]), int(faces[0][3])]]
+    else:
+        face_details = [None, [None, None, None, None]]
 
 
     # Actual detection. Variable boxes contains the bounding box cordinates for hands detected,
@@ -64,28 +79,39 @@ def detectImage(image):
     # Hint: If len(boxes) > 1 , you may assume you have found atleast one hand (within your score threshold)
     boxes, scores = detector_utils.detect_objects(image_np, detection_graph, sess)
 
-    hand_coords = detector_utils.get_coords(num_hands_detect, min_threshold, scores, boxes, im_width, im_height, image_np) #0.2 is the min threshold
+    hand_coords = detector_utils.get_hand_coords(num_hands_detect, min_threshold, scores, boxes, im_width, im_height, image_np) #0.2 is the min threshold
 
-    face_details = []
-
-    x1, x2, y1, y2 = apply_offsets(faces[0], emotion_offsets)
-    gray_face = gray_image[y1:y2, x1:x2]
-    gray_face = cv2.resize(gray_face, (emotion_target_size))
-    gray_face = preprocess_input(gray_face, True)
-    gray_face = np.expand_dims(gray_face, 0)
-    gray_face = np.expand_dims(gray_face, -1)
-    with graph.as_default():
-        emotion_prediction = emotion_classifier.predict(gray_face)
-    emotion_probability = np.max(emotion_prediction)
-    emotion_label_arg = np.argmax(emotion_prediction)
-    face_details.append((emotion_labels[emotion_label_arg], faces[0]))
+    if len(hand_coords) < 1:
+        hand_coords[0] = [None, None, None, None]
+    if len(hand_coords) < 2:
+        hand_coords[1] = [None, None, None, None]
 
     image_details = {
-                        "hands": hand_coords,
-                        "face": face_details
+                        "hands": [
+                            {
+                                "x": hand_coords[0][0],
+                                "y": hand_coords[0][1],
+                                "width": hand_coords[0][2],
+                                "height": hand_coords[0][3]
+                            },
+                            {
+                                "x": hand_coords[1][0],
+                                "y": hand_coords[1][1],
+                                "width": hand_coords[1][2],
+                                "height": hand_coords[1][3]
+                            }
+                        ],
+                        "face": {
+                                "emotion": face_details[0],
+                                "x": face_details[1][0],
+                                "y": face_details[1][1],
+                                "width": face_details[1][2],
+                                "height": face_details[1][3]
+                        }
                     }
 
-    print(str(image_details))
+    image_np = cv2.flip(image_np, 1)
+
     cv2.imwrite('box.png', cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR))
     
     return image_details
