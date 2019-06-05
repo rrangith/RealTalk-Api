@@ -40,7 +40,13 @@ emotion_target_size = emotion_classifier.input_shape[1:3]
 emotion_offsets = (20, 40)
 
 """
-PUT STUFF HERE
+Gets a PIL image and returns the structure that contains hand coordinates, emotion, and face coordinates
+This will also output an image with boxes around the face and hands if they exist for testing purposes
+
+image: the PIL image that should be analyzed
+
+The hands will be an array of 2, containing data for both hands
+The face will contain the emotion and coordinates
 """
 def detectImage(image):
     im_width, im_height = image.size # Getting image height and width
@@ -80,7 +86,14 @@ def detectImage(image):
     return image_details
 
 """
-PUT STUFF HERE
+Gets an image as a numpy array and returns coordinates of hands
+
+image_np: image as numpy array
+im_width: width of the image
+im_height: height of the image
+
+Returns an array of 2, each element in the array will be of the form [bottom x coordinate, bottom y coordinates, width, height]
+If a hand or two are missing, then an array of None will be returned
 """
 def getHandCoords(image_np, im_width, im_height):
     # Actual detection. Variable boxes contains the bounding box cordinates for hands detected,
@@ -98,7 +111,11 @@ def getHandCoords(image_np, im_width, im_height):
     return hand_coords
  
 """
-PUT STUFF HERE
+Gets an image as a numpy array and returns emotion and coordinates of face
+
+image_np: image as numpy array
+
+Returns an array of the form [emotion, bottom x coordinate, bottom y coordinate, width, height]
 """
 def getFaceDetails(image_np):
     gray_image = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY) # the model requires a grayscale image

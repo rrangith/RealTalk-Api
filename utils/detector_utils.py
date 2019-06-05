@@ -28,8 +28,36 @@ categories = label_map_util.convert_label_map_to_categories(
     label_map, max_num_classes=NUM_CLASSES, use_display_name=True)
 category_index = label_map_util.create_category_index(categories)
 
+"""
+Draw a box around hands for testing purposes and returns hand coordinates in an array
+num_hands: how many hands you want to detect
+score_thresh: minimum prediction score needed to verify hand
+scores: array of prediction scores
+boxes: coordinates
+im_width: image width
+im_height: image height
+image_np: image as a numpy array
+
+Returns an array [bottom x coordinate, bottom y coordinates, width, height]
+Will return array of None if no hands were found
+"""
+def get_hand_coords(num_hands, score_thresh, scores, boxes, im_width, im_height, image_np):
+    coords = []
+    for i in range(num_hands):
+        if (scores[i] > score_thresh):
+            (left, right, bottom, top) = (boxes[i][1] * im_width, boxes[i][3] * im_width,
+                                          boxes[i][0] * im_height, boxes[i][2] * im_height)
+            coords.append((int(left), int(bottom), int(right) - int(left), int(top) - int(bottom))) # need to cast as int so it can return properly
+            p1 = (int(left), int(top))
+            p2 = (int(right), int(bottom))
+            cv2.rectangle(image_np, p1, p2, (77, 255, 9), 3, 1) # draws rectangle around hands for testing purposes
+        else:
+            coords.append((None, None, None, None))
+
+    return coords
 
 # Load a frozen infrerence graph into memory
+# Found from example
 def load_inference_graph():
     # load frozen tensorflow model into memory
     detection_graph = tf.Graph()
@@ -43,26 +71,8 @@ def load_inference_graph():
     return detection_graph, sess
 
 
-# draw the detected bounding boxes on the images
-# You can modify this to also draw a label.
-def get_hand_coords(num_hands, score_thresh, scores, boxes, im_width, im_height, image_np):
-    coords = []
-    for i in range(num_hands):
-        if (scores[i] > score_thresh):
-            (left, right, bottom, top) = (boxes[i][1] * im_width, boxes[i][3] * im_width,
-                                          boxes[i][0] * im_height, boxes[i][2] * im_height)
-            print(left, bottom, right, top)
-            coords.append((int(left), int(bottom), int(right) - int(left), int(top) - int(bottom)))
-            p1 = (int(left), int(top))
-            p2 = (int(right), int(bottom))
-            cv2.rectangle(image_np, p1, p2, (77, 255, 9), 3, 1)
-        else:
-            coords.append((None, None, None, None))
-
-    return coords
-
-
 # Actual detection .. generate scores and bounding boxes given an image
+# Used from example code
 def detect_objects(image_np, detection_graph, sess):
     # Definite input and output Tensors for detection_graph
     image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
