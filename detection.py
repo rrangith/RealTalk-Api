@@ -2,6 +2,7 @@ import cv2
 import tensorflow as tf
 from keras.models import load_model
 import numpy as np
+from threading import Thread
 
 from utils import detector_utils as detector_utils
 from utils.datasets import get_labels
@@ -10,6 +11,11 @@ from utils.inference import draw_bounding_box
 from utils.inference import apply_offsets
 from utils.inference import load_detection_model
 from utils.preprocessor import preprocess_input
+
+"""
+Global variable for threads
+"""
+thread_storage = {} # need this instead of appending to array because you don't know which thread will finish first
 
 """
 Hand
@@ -51,10 +57,19 @@ def detectImage(image):
     im_width, im_height = image.size # Getting image height and width
     image_np = np.array(image) # Converting PIL image to numpy array
 
-    hand_coords = getHandCoords(image_np, im_width, im_height) # Get coordinates of hands in an array
+    hand_thread = Thread(target=getHandCoords, args=[image_np, im_width, im_height]) # Get coordinates of hands in an array
 
-    face_details = getFaceDetails(image_np) # Get emotion and coordinates of face
+    face_thread = Thread(target=getFaceDetails, args=[image_np]) # Get emotion and coordinates of face
 
+    hand_thread.start()
+    face_thread.start()
+
+    hand_thread.join()
+    face_thread.join()
+
+    hand_coords = thread_storage['hands']
+    face_details = thread_storage['face']
+    
     # JSON structure to return
     image_details = {
                         "hands": [
@@ -73,10 +88,10 @@ def detectImage(image):
                         ],
                         "face": {
                                 "emotion": face_details[0],
-                                "x": face_details[1][0],
-                                "y": face_details[1][1],
-                                "width": face_details[1][2],
-                                "height": face_details[1][3]
+                                "x": face_details[1],
+                                "y": face_details[2],
+                                "width": face_details[3],
+                                "height": face_details[4]
                         }
                     }
 
@@ -107,7 +122,8 @@ def getHandCoords(image_np, im_width, im_height):
     if len(hand_coords) < 2:
         hand_coords[1] = [None, None, None, None]
 
-    return hand_coords
+    thread_storage['hands'] = hand_coords # instead of returning, put it into dictionary
+
  
 """
 Gets an image as a numpy array and returns emotion and coordinates of face
@@ -139,8 +155,8 @@ def getFaceDetails(image_np):
         
         emotion_label_arg = np.argmax(emotion_prediction)
     
-        face_details = [emotion_labels[emotion_label_arg], [int(faces[0][0]), int(faces[0][1]), int(faces[0][2]), int(faces[0][3])]] # structure to return emotion and face coords
+        face_details = [emotion_labels[emotion_label_arg], int(faces[0][0]), int(faces[0][1]), int(faces[0][2]), int(faces[0][3])] # structure to return emotion and face coords
     else:
-        face_details = [None, [None, None, None, None]] # in case no face was found
+        face_details = [None, None, None, None, None] # in case no face was found
 
-    return face_details
+    thread_storage['face'] = face_details # instead of returning, put it into dictionary

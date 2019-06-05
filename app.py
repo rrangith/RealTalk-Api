@@ -10,7 +10,6 @@ from io import BytesIO
 
 app = Flask(__name__)
 CORS(app)
-app.config['DEBUG'] = True
 
 @app.route('/', methods=['GET'])
 def index():
@@ -37,13 +36,13 @@ def detectFile():
 
 @app.route('/detectLink', methods=['POST'])
 def detectLink():
-    try:
-        image_data = requests.get(request.get_json()['url'])
-        image = Image.open(BytesIO(image_data.content))
-        response = detectImage(image)
-        return jsonify(response)
-    except:
-        abort(400)
+    # try:
+    image_data = requests.get(request.get_json()['url'])
+    image = Image.open(BytesIO(image_data.content))
+    response = detectImage(image)
+    return jsonify(response)
+    # except:
+    #     abort(400)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
