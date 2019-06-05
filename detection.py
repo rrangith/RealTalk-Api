@@ -16,11 +16,6 @@ from utils.inference import apply_offsets
 from utils.inference import load_detection_model
 from utils.preprocessor import preprocess_input
 
-from PIL import Image
-import queue
-import base64
-import io
-
 detection_graph, sess = detector_utils.load_inference_graph()
 
 # parameters for loading data and images
@@ -37,18 +32,25 @@ emotion_offsets = (20, 40)
  # getting input model shapes for inference
 emotion_target_size = emotion_classifier.input_shape[1:3]
 
-im_width, im_height = (400, 350)
 
 num_hands_detect = 2 # max number of hands we want to detect/track, can scale this up
 min_threshold = 0.2
 
 def detectImage(image):
-    img_data = base64.b64decode(str(image))
-    image_np = np.asarray(Image.open(io.BytesIO(img_data)))
+    im_width, im_height = image.size
+
+    image_np = np.array(image)
+
+
     image_np = cv2.flip(image_np, 1)
     gray_image = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
 
+
+
     faces = detect_faces(face_detection, gray_image)
+
+    draw_bounding_box(faces[0], image_np)
+
 
     # Actual detection. Variable boxes contains the bounding box cordinates for hands detected,
     # while scores contains the confidence for each of these boxes.
@@ -56,6 +58,11 @@ def detectImage(image):
     boxes, scores = detector_utils.detect_objects(image_np, detection_graph, sess)
 
     hand_coords = detector_utils.get_coords(num_hands_detect, min_threshold, scores, boxes, im_width, im_height, image_np) #0.2 is the min threshold
+
+    cv2.imwrite('box.png', cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR))
+
+
+    print(str(hand_coords))
 
     face_details = []
 

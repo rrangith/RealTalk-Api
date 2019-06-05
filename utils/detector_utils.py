@@ -52,16 +52,13 @@ def get_coords(num_hands_detect, score_thresh, scores, boxes, im_width, im_heigh
             (left, right, top, bottom) = (boxes[i][1] * im_width, boxes[i][3] * im_width,
                                           boxes[i][0] * im_height, boxes[i][2] * im_height)
             coords.append((int(left), int(top), int(right), int(bottom)))
+            p1 = (int(left), int(top))
+            p2 = (int(right), int(bottom))
+            cv2.rectangle(image_np, p1, p2, (77, 255, 9), 3, 1)
         else:
             coords.append(None)
 
     return coords
-
-
-# Show fps value on image.
-def draw_fps_on_image(fps, image_np):
-    cv2.putText(image_np, fps, (20, 50),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.75, (77, 255, 9), 2)
 
 
 # Actual detection .. generate scores and bounding boxes given an image
