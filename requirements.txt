@@ -8,3 +8,4 @@ pandas
 matplotlib
 Pillow
 gunicorn
+flask-cors
