@@ -19,7 +19,7 @@ def authenticate(key):
 
 @app.route('/', methods=['GET'])
 def index():
-    return 'hi'
+    return 'Hello World'
 
 # @app.route('/detectBinary', methods=['POST'])
 # def detectBinary():
