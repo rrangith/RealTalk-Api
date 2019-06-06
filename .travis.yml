@@ -6,3 +6,10 @@ install:
   - pip install -r requirements.txt
 script:
   - pytest tests.py
+deploy:
+  provider: heroku
+  api_key:
+    secure: H25+ISrCQHiy2msrAA7MKvHTDrqzbc7WodLawDdHjBQq2n2jq253luJHvrJFyYBNjaGs5CsP1+VRHjxrYT8cjeP82A4L9lagdzrDC+58DnBLy8ovdyWO7uxAuqd+erUXfR0JBP8LnIjNhZOKtzMa+s9t6/FsJKIp7iCl5wcgTGcHNYMivNJ2I0Cj8fnv4G6IY0jf3Z/qDkDZa+6YxYHiH6FA16KlJuOPIDeINh4rHPzdJRYazVcZTh3ID65ZA1IhPuRTE88CZlSA0knMgIoMKiCBklGAZ5wi9cFCdjPgxmq2BwUqKR5ykm5LlIXXYPdFZwZY13ahvK4fLkVBYk8d+9zJmoGCEvGJ3ZkwtIF+IhJGLgxhHiRSHiBEs58T3wdI1CA6LKV7/BDT7VPWD6bhEj6RlzxrT7U14+u1HsVyCPa+HB3oLu7WW6kjCxxWu4f1JuGFtR88TSmVzsCVxfHsgrsqoUPIJOUBY/R3vMahR5fyqDZquw/KAl9QBqDqFNn8Opc1C9u1cAeLR8ibV4gUvXsAMQzsXskszD+spQvRvVBTT0wWkdrqTYSwXLtiPGc7U20r9eFIcl1o6XfVoyoiMe0PHFjuzOTwcx+xKTle3dvzpI3qmYaSyx7DKLOsF4Mf/hVGsIqInFYXsA7/OfkVz2A1xwpscd3EyHT+LxXwb3A=
+  app: api-realtalk
+  on:
+    branch: master
