@@ -1,15 +1,21 @@
 from flask import Flask, jsonify, request, abort
 from flask_cors import CORS
-from detection import detectImage
-
 import base64
 import io
 from PIL import Image
 import requests
 from io import BytesIO
+import os
+
+from detection import detectImage
 
 app = Flask(__name__)
 CORS(app)
+
+def authenticate(key):
+    api_key = os.environ.get('API_KEY')
+    if key != api_key and api_key != None:
+        abort(401)
 
 @app.route('/', methods=['GET'])
 def index():
@@ -27,6 +33,7 @@ def index():
 
 @app.route('/detectFile', methods=['POST'])
 def detectFile():
+    authenticate(request.headers.get('x-api-key'))
     try:
         image = Image.open(request.files['file'])
         response = detectImage(image)
@@ -36,13 +43,14 @@ def detectFile():
 
 @app.route('/detectLink', methods=['POST'])
 def detectLink():
-    # try:
-    image_data = requests.get(request.get_json()['url'])
-    image = Image.open(BytesIO(image_data.content))
-    response = detectImage(image)
-    return jsonify(response)
-    # except:
-    #     abort(400)
+    authenticate(request.headers.get('x-api-key'))
+    try:
+        image_data = requests.get(request.get_json()['url'])
+        image = Image.open(BytesIO(image_data.content))
+        response = detectImage(image)
+        return jsonify(response)
+    except:
+        abort(400)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
