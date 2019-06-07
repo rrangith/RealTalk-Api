@@ -12,6 +12,13 @@ from detection import detectImage
 app = Flask(__name__)
 CORS(app)
 
+"""
+This function authenticates the user
+
+key: the key passed in as the x-api-key header
+
+Raises a 401 Unauthorized error if the key passed in does not match the preset key
+"""
 def authenticate(key):
     api_key = os.environ.get('API_KEY')
     if key != api_key and api_key != None:
@@ -21,6 +28,7 @@ def authenticate(key):
 def index():
     return 'Hello World'
 
+# This needs to be tested with application code
 # @app.route('/detectBinary', methods=['POST'])
 # def detectBinary():
 #     try:
@@ -31,6 +39,10 @@ def index():
 #     except:
 #         abort(400)
 
+"""
+Endpoint to detect using a file
+Read README for more details
+"""
 @app.route('/detectFile', methods=['POST'])
 def detectFile():
     authenticate(request.headers.get('x-api-key'))
@@ -41,6 +53,10 @@ def detectFile():
     except:
         abort(400)
 
+"""
+Endpoint to detect using a link
+Read README for more details
+"""
 @app.route('/detectLink', methods=['POST'])
 def detectLink():
     authenticate(request.headers.get('x-api-key'))
@@ -53,4 +69,4 @@ def detectLink():
         abort(400)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)
