@@ -82,3 +82,8 @@ docker run -it -e API_KEY=[Insert Value Here] -p 5000:5000 realtalk-api
 ```
 
 Example: `docker run -it -e API_KEY=asd -p 5000:5000 realtalk-api`
+
+### Image Classification Models:
+https://github.com/victordibia/handtracking
+
+https://github.com/oarriaga/face_classification
