@@ -4,6 +4,8 @@ https://api-realtalk.herokuapp.com/ (Due to limited memory from the free tier, t
 
 This API resolves an issue from [RealTalk](https://github.com/rrangith/realTalk/). That project used a server that saved the state. As a result, multiple people would not be able to use the app at the same time. With this microservice, multiple people will be able to use the app at the same time. Other users are also able to use this API in their apps to determine the coordinates of a face and hands in an image, along with emotions.
 
+![Image](https://i.imgur.com/XSY4Lnn.png)
+
 ## API Docs
 
 ### Authentication
@@ -62,7 +64,7 @@ Pass in the file as the value, with the key `file`
 
 ## Multi Threading
 
-One of the bottlenecks in this project was that it took a long time to detect the face and hands. The detection of the face and hands could be done in parallel, so I used two threads to do this detection concurrently. This resulted in faster responses.
+One of the bottlenecks in this project was that it took a long time to detect the face and hands. The detection of the face and hands could be done in parallel, so I used two threads to do this. This resulted in faster responses.
 
 ## Automatic Builds
 
