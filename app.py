@@ -40,20 +40,6 @@ def index():
 #         abort(400)
 
 """
-Endpoint to detect using a file
-Read README for more details
-"""
-@app.route('/detectFile', methods=['POST'])
-def detectFile():
-    authenticate(request.headers.get('x-api-key'))
-    try:
-        image = Image.open(request.files['file'])
-        response = detectImage(image)
-        return jsonify(response)
-    except:
-        abort(400)
-
-"""
 Endpoint to detect using a link
 Read README for more details
 """
@@ -63,6 +49,20 @@ def detectLink():
     try:
         image_data = requests.get(request.get_json()['url'])
         image = Image.open(BytesIO(image_data.content))
+        response = detectImage(image)
+        return jsonify(response)
+    except:
+        abort(400)
+
+"""
+Endpoint to detect using a file
+Read README for more details
+"""
+@app.route('/detectFile', methods=['POST'])
+def detectFile():
+    authenticate(request.headers.get('x-api-key'))
+    try:
+        image = Image.open(request.files['file'])
         response = detectImage(image)
         return jsonify(response)
     except:
